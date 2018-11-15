@@ -5,30 +5,15 @@
  */
 package Memory;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.Timer;
-//import java.util.Timer;
 
 /**
  *
@@ -40,17 +25,14 @@ public class Game extends javax.swing.JPanel implements ActionListener {
      * Creates new form panel2
      */
     int n = 4;
-
     ArrayList<JButton> buttons = new ArrayList<>(n * 2);
     ArrayList<ImageIcon> iconList = new ArrayList<>();
     JButton selected1 = null;
     JButton selected2 = null;
     boolean isMatch = false;
-    String time = "0 : 0";
     int moves = 0;
-    int movesMed = 12;
-    int movesLarge = 35;
     int count = 0;
+    String time = "00 : 00";
     String iconsChosen = "";
     String diffChosen = "";
     String sizeChosen = "";
@@ -59,11 +41,14 @@ public class Game extends javax.swing.JPanel implements ActionListener {
 
     public Game() {
         initComponents();
+        FileWriteRead addInfo = new FileWriteRead();
+        try {
+            addInfo.addInfo(userList, resultListLarge, resultListMedium);
+            addInfo.userInfo(userList);
+        } catch (Exception files) {
+            addInfo.createFiles();
+        }
         AddListen();
-        addInfo();
-        //Timer timer;
-        timerPause.addActionListener(actionListenerT);
-        timerPause.setSelected(false);
         labelEnd.setText("Choose your game options!");
         labelBackground.setIcon(background);
     }
@@ -75,16 +60,14 @@ public class Game extends javax.swing.JPanel implements ActionListener {
             int min = 0;
             count++;
             //TODO var mēģināt saīsināt
-            if (count >= 60) {
-                min = count / 60;
-            }
-            if (count < 60) {
-                min = 0;
-                time = String.valueOf(min) + " : " + String.valueOf(count);
-            } else {
-                time = String.valueOf(min) + " : " + String.valueOf(count % (min * 60));
-            }
+            min = (count >= 60) ? (count / 60) : 0;
+
             if (count < 3600) {
+                if (count < 60) {
+                    time = String.valueOf(String.format("%02d", min)) + " : " + String.valueOf(String.format("%02d", count));
+                } else {
+                    time = String.valueOf(String.format("%02d", min)) + " : " + String.valueOf(String.format("%02d", (count % (min * 60))));
+                }
                 labelTime.setText("Time: " + time);
             } else {
                 ((Timer) (evt.getSource())).stop();
@@ -114,10 +97,6 @@ public class Game extends javax.swing.JPanel implements ActionListener {
         imPhotos = new javax.swing.JToggleButton();
         imClipart = new javax.swing.JToggleButton();
         imIcons = new javax.swing.JToggleButton();
-        panelResults = new javax.swing.JPanel();
-        labelResults = new javax.swing.JLabel();
-        resultsTitle = new javax.swing.JLabel();
-        resultList = new java.awt.List();
         jPanel1 = new javax.swing.JPanel();
         addPlayer = new javax.swing.JButton();
         newPlayer = new javax.swing.JTextField();
@@ -130,7 +109,13 @@ public class Game extends javax.swing.JPanel implements ActionListener {
         labelTime = new javax.swing.JLabel();
         timerPause = new javax.swing.JToggleButton();
         movesRem = new javax.swing.JLabel();
+        tabbed2 = new javax.swing.JTabbedPane();
+        jPanel3 = new javax.swing.JPanel();
+        resultListLarge = new java.awt.List();
+        jPanel4 = new javax.swing.JPanel();
+        resultListMedium = new java.awt.List();
 
+        setBackground(new java.awt.Color(215, 198, 172));
         setForeground(new java.awt.Color(102, 102, 102));
 
         field.setMaximumSize(new java.awt.Dimension(510, 510));
@@ -149,53 +134,69 @@ public class Game extends javax.swing.JPanel implements ActionListener {
             .addComponent(labelBackground, javax.swing.GroupLayout.DEFAULT_SIZE, 500, Short.MAX_VALUE)
         );
 
+        panelGameChose.setBackground(new java.awt.Color(239, 237, 223));
         panelGameChose.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
 
+        labelDifficulty.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
+        labelDifficulty.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         labelDifficulty.setText("Difficulty:");
 
+        labelSize.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
+        labelSize.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         labelSize.setText("Size:");
 
-        newGame.setText("New game");
+        newGame.setBackground(new java.awt.Color(146, 103, 78));
+        newGame.setFont(new java.awt.Font("SansSerif", 1, 24)); // NOI18N
+        newGame.setForeground(new java.awt.Color(255, 255, 255));
+        newGame.setText("LOAD GAME");
+        newGame.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.white, java.awt.Color.lightGray, new java.awt.Color(51, 51, 51), java.awt.Color.darkGray));
         newGame.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 newGameActionPerformed(evt);
             }
         });
 
-        diffNormal.setBackground(new java.awt.Color(154, 211, 154));
-        diffNormal.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        diffNormal.setBackground(new java.awt.Color(164, 143, 109));
+        diffNormal.setFont(new java.awt.Font("SansSerif", 1, 12)); // NOI18N
+        diffNormal.setForeground(new java.awt.Color(51, 51, 51));
         diffNormal.setText("Normal");
-        diffNormal.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.darkGray, null));
+        diffNormal.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.black, java.awt.Color.lightGray));
 
-        diffHard.setBackground(new java.awt.Color(154, 211, 154));
-        diffHard.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        diffHard.setBackground(new java.awt.Color(164, 143, 109));
+        diffHard.setFont(new java.awt.Font("SansSerif", 1, 12)); // NOI18N
+        diffHard.setForeground(new java.awt.Color(51, 51, 51));
         diffHard.setText("Hard");
-        diffHard.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.darkGray, null));
+        diffHard.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.black, java.awt.Color.lightGray));
 
-        sizeMedium.setBackground(new java.awt.Color(154, 211, 154));
-        sizeMedium.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        sizeMedium.setBackground(new java.awt.Color(200, 181, 151));
+        sizeMedium.setFont(new java.awt.Font("SansSerif", 1, 12)); // NOI18N
+        sizeMedium.setForeground(new java.awt.Color(51, 51, 51));
         sizeMedium.setText("Medium");
-        sizeMedium.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.darkGray, null));
+        sizeMedium.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.black, java.awt.Color.lightGray));
 
-        sizeLarge.setBackground(new java.awt.Color(154, 211, 154));
-        sizeLarge.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        sizeLarge.setBackground(new java.awt.Color(200, 181, 151));
+        sizeLarge.setFont(new java.awt.Font("SansSerif", 1, 12)); // NOI18N
+        sizeLarge.setForeground(new java.awt.Color(51, 51, 51));
         sizeLarge.setText("Large");
-        sizeLarge.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.darkGray, null));
+        sizeLarge.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.black, java.awt.Color.lightGray));
 
-        imPhotos.setBackground(new java.awt.Color(154, 211, 154));
-        imPhotos.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        imPhotos.setBackground(new java.awt.Color(215, 198, 172));
+        imPhotos.setFont(new java.awt.Font("SansSerif", 1, 12)); // NOI18N
+        imPhotos.setForeground(new java.awt.Color(51, 51, 51));
         imPhotos.setText("Photos");
-        imPhotos.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.darkGray, null));
+        imPhotos.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.black, java.awt.Color.lightGray));
 
-        imClipart.setBackground(new java.awt.Color(154, 211, 154));
-        imClipart.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        imClipart.setBackground(new java.awt.Color(215, 198, 172));
+        imClipart.setFont(new java.awt.Font("SansSerif", 1, 12)); // NOI18N
+        imClipart.setForeground(new java.awt.Color(51, 51, 51));
         imClipart.setText("ClipArt");
-        imClipart.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.darkGray, null));
+        imClipart.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.black, java.awt.Color.lightGray));
 
-        imIcons.setBackground(new java.awt.Color(154, 211, 154));
-        imIcons.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        imIcons.setBackground(new java.awt.Color(215, 198, 172));
+        imIcons.setFont(new java.awt.Font("SansSerif", 1, 12)); // NOI18N
+        imIcons.setForeground(new java.awt.Color(51, 51, 51));
         imIcons.setText("Icons");
-        imIcons.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.darkGray, null));
+        imIcons.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.black, java.awt.Color.lightGray));
 
         javax.swing.GroupLayout panelGameChoseLayout = new javax.swing.GroupLayout(panelGameChose);
         panelGameChose.setLayout(panelGameChoseLayout);
@@ -207,16 +208,16 @@ public class Game extends javax.swing.JPanel implements ActionListener {
                     .addComponent(newGame, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(panelGameChoseLayout.createSequentialGroup()
                         .addGroup(panelGameChoseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(labelDifficulty)
-                            .addComponent(labelSize)
-                            .addComponent(imPhotos, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
+                            .addComponent(imPhotos, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(labelSize, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(labelDifficulty, javax.swing.GroupLayout.Alignment.TRAILING))
+                        .addGap(28, 28, 28)
                         .addGroup(panelGameChoseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelGameChoseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                 .addComponent(diffNormal, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(sizeMedium, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(imClipart, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(26, 26, 26)
+                            .addComponent(imClipart, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(panelGameChoseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(sizeLarge, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(diffHard, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -231,77 +232,64 @@ public class Game extends javax.swing.JPanel implements ActionListener {
                     .addGroup(panelGameChoseLayout.createSequentialGroup()
                         .addGroup(panelGameChoseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(imPhotos, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(imIcons, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(panelGameChoseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(imIcons, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(imClipart, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(panelGameChoseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(labelSize)
-                            .addComponent(sizeLarge, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(sizeLarge, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(11, 11, 11)
+                        .addComponent(diffHard, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(panelGameChoseLayout.createSequentialGroup()
+                        .addGap(36, 36, 36)
+                        .addGroup(panelGameChoseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(sizeMedium, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(labelSize))
                         .addGap(11, 11, 11)
                         .addGroup(panelGameChoseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(diffHard, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(labelDifficulty)))
-                    .addGroup(panelGameChoseLayout.createSequentialGroup()
-                        .addComponent(imClipart, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(sizeMedium, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(11, 11, 11)
-                        .addComponent(diffNormal, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(diffNormal, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(labelDifficulty))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(newGame, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        panelResults.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
-
-        labelResults.setText("Size: Large      Size: Medium");
-
-        resultsTitle.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        resultsTitle.setText("Best results");
-
-        javax.swing.GroupLayout panelResultsLayout = new javax.swing.GroupLayout(panelResults);
-        panelResults.setLayout(panelResultsLayout);
-        panelResultsLayout.setHorizontalGroup(
-            panelResultsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelResultsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(panelResultsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(resultList, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(panelResultsLayout.createSequentialGroup()
-                        .addGroup(panelResultsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(labelResults)
-                            .addComponent(resultsTitle))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        panelResultsLayout.setVerticalGroup(
-            panelResultsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelResultsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(resultsTitle)
-                .addGap(7, 7, 7)
-                .addComponent(labelResults)
-                .addGap(1, 1, 1)
-                .addComponent(resultList, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-
+        jPanel1.setBackground(new java.awt.Color(239, 237, 223));
         jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
         jPanel1.setForeground(new java.awt.Color(153, 153, 153));
 
-        addPlayer.setText("ADD");
+        addPlayer.setBackground(new java.awt.Color(215, 198, 172));
+        addPlayer.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
+        addPlayer.setForeground(new java.awt.Color(51, 51, 51));
+        addPlayer.setText("Add");
+        addPlayer.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.black, java.awt.Color.lightGray));
         addPlayer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addPlayerActionPerformed(evt);
             }
         });
 
-        labelNewPlayer.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        newPlayer.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
+
+        labelNewPlayer.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
+        labelNewPlayer.setForeground(new java.awt.Color(51, 51, 51));
         labelNewPlayer.setText("New player: ");
 
-        labelPlayer.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        labelPlayer.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
+        labelPlayer.setForeground(new java.awt.Color(51, 51, 51));
         labelPlayer.setText("PLAYER: ");
 
-        deletePlayer.setText("Delete player");
+        userList.setFont(new java.awt.Font("SansSerif", 1, 12)); // NOI18N
+
+        deletePlayer.setBackground(new java.awt.Color(215, 198, 172));
+        deletePlayer.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
+        deletePlayer.setForeground(new java.awt.Color(51, 51, 51));
+        deletePlayer.setText("Delete");
+        deletePlayer.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.black, java.awt.Color.lightGray));
+        deletePlayer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deletePlayerActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -312,12 +300,12 @@ public class Game extends javax.swing.JPanel implements ActionListener {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(labelNewPlayer)
                     .addComponent(labelPlayer))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(userList, 0, 112, Short.MAX_VALUE)
-                    .addComponent(newPlayer))
+                    .addComponent(userList, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(newPlayer, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(deletePlayer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(addPlayer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
@@ -327,36 +315,45 @@ public class Game extends javax.swing.JPanel implements ActionListener {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(userList, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(userList, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(labelPlayer)
-                    .addComponent(deletePlayer))
+                    .addComponent(deletePlayer, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(newPlayer)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(labelNewPlayer)
-                        .addComponent(addPlayer)))
+                        .addComponent(addPlayer, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
 
+        jPanel2.setBackground(new java.awt.Color(239, 237, 223));
         jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
 
         labelEnd.setBackground(new java.awt.Color(255, 255, 255));
-        labelEnd.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        labelEnd.setFont(new java.awt.Font("SansSerif", 1, 18)); // NOI18N
         labelEnd.setForeground(new java.awt.Color(204, 0, 0));
         labelEnd.setText("Game on!");
 
+        labelTime.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
+        labelTime.setForeground(new java.awt.Color(51, 51, 51));
         labelTime.setText("Time: ");
 
+        timerPause.setBackground(new java.awt.Color(215, 198, 172));
+        timerPause.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
+        timerPause.setForeground(new java.awt.Color(51, 51, 51));
         timerPause.setSelected(true);
         timerPause.setText("pause");
+        timerPause.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, java.awt.Color.white, java.awt.Color.black, java.awt.Color.lightGray));
         timerPause.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 timerPauseActionPerformed(evt);
             }
         });
 
-        movesRem.setText("Moves remaining: ");
+        movesRem.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
+        movesRem.setForeground(new java.awt.Color(51, 51, 51));
+        movesRem.setText("Pairs remaining: -");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -365,13 +362,16 @@ public class Game extends javax.swing.JPanel implements ActionListener {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(labelEnd)
-                    .addComponent(movesRem)
                     .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(labelEnd)
+                            .addComponent(movesRem))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(timerPause, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(labelTime)
-                        .addGap(98, 98, 98)
-                        .addComponent(timerPause)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -379,13 +379,51 @@ public class Game extends javax.swing.JPanel implements ActionListener {
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(labelTime)
-                    .addComponent(timerPause))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(timerPause, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(5, 5, 5)
                 .addComponent(movesRem)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(labelEnd)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(13, Short.MAX_VALUE))
         );
+
+        tabbed2.setBackground(new java.awt.Color(239, 237, 223));
+        tabbed2.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
+        tabbed2.setToolTipText("");
+        tabbed2.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
+        tabbed2.setName(""); // NOI18N
+
+        jPanel3.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+
+        resultListLarge.setFont(new java.awt.Font("SansSerif", 1, 12)); // NOI18N
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(resultListLarge, javax.swing.GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE)
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(resultListLarge, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 107, Short.MAX_VALUE)
+        );
+
+        tabbed2.addTab("Best results: large size", jPanel3);
+
+        resultListMedium.setFont(new java.awt.Font("SansSerif", 1, 12)); // NOI18N
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(resultListMedium, javax.swing.GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE)
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(resultListMedium, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 107, Short.MAX_VALUE)
+        );
+
+        tabbed2.addTab("Best results: medium size", jPanel4);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -396,11 +434,11 @@ public class Game extends javax.swing.JPanel implements ActionListener {
                 .addComponent(field, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(panelResults, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(panelGameChose, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(18, Short.MAX_VALUE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(tabbed2))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -413,28 +451,34 @@ public class Game extends javax.swing.JPanel implements ActionListener {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(panelResults, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(tabbed2)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        tabbed2.getAccessibleContext().setAccessibleName("");
     }// </editor-fold>//GEN-END:initComponents
+
 
     private void newGameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newGameActionPerformed
         //clears old field
         field.removeAll();
+        field.invalidate();
+        field.revalidate();
         buttons.removeAll(buttons);
         iconList.removeAll(iconList);
+        time = "00 : 00";
         //creates new field
-        //timer.stop();
-        count = 0;
-        labelEnd.setText("Game on!");
-        moves = (sizeChosen.equals("medium")) ? movesMed : movesLarge;
         if (diffChosen.isEmpty() || sizeChosen.isEmpty() || iconsChosen.isEmpty()) {
-            System.out.println("empty");
             labelEnd.setText("Choose all game options!");
         } else {
+            moves = (sizeChosen.equals("medium")) ? 12 : 35;
+            n = (sizeChosen.equals("medium")) ? 4 : 6;
             GridLayout();
+            count = 0;
+            timer.stop();
+            labelEnd.setText("Game on!");
         }
     }//GEN-LAST:event_newGameActionPerformed
 
@@ -444,12 +488,28 @@ public class Game extends javax.swing.JPanel implements ActionListener {
 
     private void addPlayerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addPlayerActionPerformed
         String player = newPlayer.getText();
-        savePlayer(player);
-        userList.addItem(player);
-        newPlayer.setText("");
-        userList.setSelectedIndex(userList.getItemCount() - 1);
-
+        if (player.isEmpty()) {
+            labelEnd.setText("Enter player name!");
+        } else if (player.contains(" ")) {
+            labelEnd.setText("No white spaces!");
+        } else if (player.length() > 10) {
+            labelEnd.setText("Max 10 symbols");
+        } else {
+            FileWriteRead savePlayer = new FileWriteRead();
+            savePlayer.savePlayer(player);
+            userList.addItem(player);
+            newPlayer.setText("");
+            userList.setSelectedIndex(userList.getItemCount() - 1);
+            labelEnd.setText("Choose your game options!");
+        }
     }//GEN-LAST:event_addPlayerActionPerformed
+
+    private void deletePlayerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deletePlayerActionPerformed
+        int rem = userList.getSelectedIndex();
+        FileWriteRead removePlayer = new FileWriteRead();
+        removePlayer.removePlayer(String.valueOf(userList.getSelectedItem()));
+        userList.removeItemAt(rem);
+    }//GEN-LAST:event_deletePlayerActionPerformed
     private void AddListen() {
         imIcons.addActionListener(actionListenerT);
         imClipart.addActionListener(actionListenerT);
@@ -458,7 +518,6 @@ public class Game extends javax.swing.JPanel implements ActionListener {
         diffNormal.addActionListener(actionListenerT);
         sizeLarge.addActionListener(actionListenerT);
         sizeMedium.addActionListener(actionListenerT);
-        //newGame.addActionListener(actionListenerN);
     }
 
     private void GridLayout() {
@@ -469,8 +528,9 @@ public class Game extends javax.swing.JPanel implements ActionListener {
         }
         labelTime.setText("Time: " + time);
 
-//creates field and addds buttons from arraylist   
+//creates field and adds buttons from arraylist   
         field.setLayout(new GridLayout(n, n));
+
         for (int i = 0; i < n * n; i++) {
             buttons.add(new JButton());
             buttons.get(i).setName("b" + i);
@@ -478,44 +538,14 @@ public class Game extends javax.swing.JPanel implements ActionListener {
             buttons.get(i).addActionListener(actionListener);
             buttons.get(i).setBackground(Color.WHITE);
         }
-
-//creates & shuffles icons
-        for (int i = 0; i < n * n / 2; i++) {
-            switch (iconsChosen) {
-                case "photos":
-                    icon = new ImageIcon("src\\images\\photos\\icon" + i + ".jpg");
-                    icon = new ImageIcon("src\\images\\photos\\icon" + i + ".jpg");
-                    break;
-                case "clipart":
-                    icon = new ImageIcon("src\\images\\clipart\\icon" + i + ".jpg");
-                    icon = new ImageIcon("src\\images\\clipart\\icon" + i + ".jpg");
-                    break;
-                case "icons":
-                    icon = new ImageIcon("src\\images\\icons\\icon" + i + ".jpg");
-                    icon = new ImageIcon("src\\images\\icons\\icon" + i + ".jpg");
-                    break;
-            }
-            Image resized = icon.getImage();
-            if (sizeChosen.equals("medium")) {
-                resized = icon.getImage().getScaledInstance(122, 122, Image.SCALE_SMOOTH);
-            }
-            if (sizeChosen.equals("large")) {
-                resized = icon.getImage().getScaledInstance(81, 81, Image.SCALE_SMOOTH);
-            }
-            icon = new ImageIcon(resized);
-            iconList.add(icon);
-            iconList.add(icon);
-        }
-        Collections.shuffle(iconList);
-
+        createIcons createIcons = new createIcons();
+        createIcons.createIcons(n, icon, sizeChosen, iconsChosen, iconList);
     }
 
     ActionListener actionListenerT = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evttoggle) {
-            //JToggleButton buttonT = (JToggleButton) evttoggle.getSource();
             String action = evttoggle.getActionCommand();
-//timer.stop();
             switch (action) {
                 case "Hard":
                     diffHard.setSelected(true);
@@ -530,16 +560,14 @@ public class Game extends javax.swing.JPanel implements ActionListener {
                 case "Medium":
                     sizeMedium.setSelected(true);
                     sizeLarge.setSelected(false);
+                    tabbed2.setSelectedIndex(1);
                     sizeChosen = "medium";
-                    moves = movesMed;
-                    n = 4;
                     break;
                 case "Large":
                     sizeMedium.setSelected(false);
                     sizeLarge.setSelected(true);
+                    tabbed2.setSelectedIndex(0);
                     sizeChosen = "large";
-                    moves = movesLarge;
-                    n = 6;
                     break;
                 case "Photos":
                     iconsChosen = "photos";
@@ -574,16 +602,13 @@ public class Game extends javax.swing.JPanel implements ActionListener {
             } else {
                 movesRem.setText("Pairs remaining: unlimited");
             }
-
             clearIcons();
 
             JButton button = (JButton) evt.getSource();
             for (JButton btn : buttons) {
                 if (button == btn) {
-                    System.out.println("icon name:  " + button.getName());
-                    int name2 = Integer.valueOf((button.getName()).replace("b", ""));
-                    button.setIcon(iconList.get(name2));
-                    System.out.println("icon n:  " + button.getIcon());
+                    int name = Integer.valueOf((button.getName()).replace("b", ""));
+                    button.setIcon(iconList.get(name));
                     if (selected1 == null) {
                         selected1 = button;
                         selected1.removeActionListener(actionListener);
@@ -598,20 +623,13 @@ public class Game extends javax.swing.JPanel implements ActionListener {
         }
     };
 
-//    ActionListener actionListenerN = new ActionListener() {
-//        @Override
-//        public void actionPerformed(ActionEvent evn) {
-//            System.out.println("new game");          
-//        }
-//    };
     private void clearIcons() {
         if (selected1 != null && selected2 != null) {
             selected1.addActionListener(actionListener);
             selected2.addActionListener(actionListener);
-            if (!isMatch) {//sakrīt
+            if (!isMatch) {
                 selected1.setIcon(null);
                 selected2.setIcon(null);
-
             }
             selected1 = null;
             selected2 = null;
@@ -623,19 +641,16 @@ public class Game extends javax.swing.JPanel implements ActionListener {
 //checks pairs
         if (selected1 != null && selected2 != null) {
             if (selected1.getIcon() == selected2.getIcon()) {
-                System.out.println("match!");
                 isMatch = true;
                 selected1.setEnabled(false);
                 selected2.setEnabled(false);
             }
             if (selected1.getIcon() != selected2.getIcon()) {
-                System.out.println("no match!");
                 isMatch = false;
             }
             if (diffChosen.equals("hard")) {
                 moves--;
             }
-            System.out.println("Sel1: " + selected1.getName() + "  sel2: " + selected2.getName());
         }
 //if moves == 0
         if (diffChosen.equals("hard")) {
@@ -647,105 +662,26 @@ public class Game extends javax.swing.JPanel implements ActionListener {
                 }
             }
         }
-        if (diffChosen.equals("normal")) {
-            System.out.println("normal going on");
-        }
 
 //checks if every icons is revealed
         for (int i = 0; i < buttons.size(); i++) {
             if (buttons.get(i).getIcon() == null) {
-                System.out.println("tukss");
                 break;
             } else if (i == buttons.size() - 1) {
-                System.out.println("pilns");
-                labelEnd.setText("Completed!");
                 timer.stop();
-                String result = labelTime.getText() + "   Player: " + userList.getSelectedItem();
-                //resultList.add(labelTime.getText() + "   Player: " + userList.getSelectedItem());
-                saveResults(result);
-                addInfo();
-            }
-
-            //labelTime.getText().
-        }
-    }
-
-    private void savePlayer(String player) {
-        File myFile = new File("src\\data\\userList.txt");
-        FileWriter fw;
-        BufferedWriter bw;
-        try {
-            fw = new FileWriter(myFile, true);
-            bw = new BufferedWriter(fw);
-            myFile.canWrite();
-            bw.write(player);
-            bw.newLine();
-            bw.close();
-            //fw.close();
-        } catch (Exception exc) {
-            System.out.println(exc);
-        }
-    }
-    
-    private void saveResults(String result) {
-        File myFile = new File("src\\data\\resultList.txt");
-        FileWriter fw;
-        BufferedWriter bw;
-        try {
-            fw = new FileWriter(myFile, true);
-            bw = new BufferedWriter(fw);
-            myFile.canWrite();
-            bw.write(result);
-            bw.newLine();
-            bw.close();
-            //fw.close();
-        } catch (Exception exc) {
-            System.out.println(exc);
-        }
-    }
-
-    private void addInfo() {
-        BufferedReader input = null;
-        BufferedReader input2 = null;
-        try {
-            input2 = new BufferedReader(new FileReader("src\\data\\resultList.txt"));
-            input = new BufferedReader(new FileReader("src\\data\\userList.txt"));
-            //List<String> strings = new ArrayList<String>();
-            String line = null;
-            String line2 = null;
-            try {
-                while ((line = input.readLine()) != null) {
-                    //strings.add(line);
-                    userList.addItem(line);
+                String result = labelTime.getText() + "     Player: " + userList.getSelectedItem();
+                FileWriteRead results = new FileWriteRead();
+                results.saveResults(result, sizeChosen);
+                results.addInfo(userList, resultListLarge, resultListMedium);
+                String best = (sizeChosen.equals("medium")) ? resultListMedium.getItem(0) : resultListLarge.getItem(0);
+                if (result.equals(best.substring(9))) {
+                    labelEnd.setText("Completed! Best result!");
+                } else {
+                    labelEnd.setText("Completed! Result saved!");
                 }
-                while ((line2 = input2.readLine()) != null) {
-                    //strings.add(line);
-                    resultList.add(line2);
-                    System.out.println("raksta result");
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } catch (FileNotFoundException e) {
-            //System.err.println("Error, file " + filePath + " didn't exist.");
-        } finally {
-            try {
-                input.close();
-            } catch (IOException ex) {
-                Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            try {
-                input2.close();
-                System.out.println("reading");
-            } catch (IOException ex) {
-                Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-
-        //String[] lineArray = strings.toArray(new String[]{});
-        //JComboBox comboBox = new JComboBox(lineArray);
     }
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addPlayer;
@@ -758,23 +694,24 @@ public class Game extends javax.swing.JPanel implements ActionListener {
     private javax.swing.JToggleButton imPhotos;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JLabel labelBackground;
     private javax.swing.JLabel labelDifficulty;
     private javax.swing.JLabel labelEnd;
     private javax.swing.JLabel labelNewPlayer;
     private javax.swing.JLabel labelPlayer;
-    private javax.swing.JLabel labelResults;
     private javax.swing.JLabel labelSize;
     private javax.swing.JLabel labelTime;
     private javax.swing.JLabel movesRem;
     private javax.swing.JButton newGame;
     private javax.swing.JTextField newPlayer;
     private javax.swing.JPanel panelGameChose;
-    private javax.swing.JPanel panelResults;
-    private java.awt.List resultList;
-    private javax.swing.JLabel resultsTitle;
+    private java.awt.List resultListLarge;
+    private java.awt.List resultListMedium;
     private javax.swing.JToggleButton sizeLarge;
     private javax.swing.JToggleButton sizeMedium;
+    private javax.swing.JTabbedPane tabbed2;
     private javax.swing.JToggleButton timerPause;
     private javax.swing.JComboBox<String> userList;
     // End of variables declaration//GEN-END:variables
