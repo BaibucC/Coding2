@@ -43,10 +43,14 @@ public class Game extends javax.swing.JPanel implements ActionListener {
         initComponents();
         FileWriteRead addInfo = new FileWriteRead();
         try {
-            addInfo.addInfo(userList, resultListLarge, resultListMedium);
-            addInfo.userInfo(userList);
+            addInfo.addInfo(resultListLarge, resultListMedium);
         } catch (Exception files) {
             addInfo.createFiles();
+        }
+        try {
+            addInfo.userInfo(userList);
+        } catch (Exception files) {
+            addInfo.createUserFile();
         }
         AddListen();
         labelEnd.setText("Choose your game options!");
@@ -472,6 +476,8 @@ public class Game extends javax.swing.JPanel implements ActionListener {
         //creates new field
         if (diffChosen.isEmpty() || sizeChosen.isEmpty() || iconsChosen.isEmpty()) {
             labelEnd.setText("Choose all game options!");
+        } else if (userList.getItemCount()==0) {
+            labelEnd.setText("Create user!");
         } else {
             moves = (sizeChosen.equals("medium")) ? 12 : 35;
             n = (sizeChosen.equals("medium")) ? 4 : 6;
@@ -672,7 +678,7 @@ public class Game extends javax.swing.JPanel implements ActionListener {
                 String result = labelTime.getText() + "     Player: " + userList.getSelectedItem();
                 FileWriteRead results = new FileWriteRead();
                 results.saveResults(result, sizeChosen);
-                results.addInfo(userList, resultListLarge, resultListMedium);
+                results.addInfo(resultListLarge, resultListMedium);
                 String best = (sizeChosen.equals("medium")) ? resultListMedium.getItem(0) : resultListLarge.getItem(0);
                 if (result.equals(best.substring(9))) {
                     labelEnd.setText("Completed! Best result!");

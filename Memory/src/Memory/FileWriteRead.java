@@ -28,9 +28,17 @@ public class FileWriteRead {
 
     public void createFiles() {
         try {
-            PrintWriter writer = new PrintWriter("src\\data\\userList.txt", "UTF-8");
-            writer = new PrintWriter("src\\data\\resultListL.txt", "UTF-8");
+            PrintWriter writer = new PrintWriter("src\\data\\resultListL.txt", "UTF-8");
             writer = new PrintWriter("src\\data\\resultListM.txt", "UTF-8");
+            writer.close();
+        } catch (Exception exf) {
+            System.out.println("File creation failed");
+        }
+    }
+
+    public void createUserFile() {
+        try {
+            PrintWriter writer = new PrintWriter("src\\data\\userList.txt", "UTF-8");
             writer.close();
         } catch (Exception exf) {
             System.out.println("File creation failed");
@@ -125,22 +133,32 @@ public class FileWriteRead {
                     userList.addItem(line);
                 }
             } catch (IOException ex) {
-                Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Game.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         } catch (FileNotFoundException e) {
-            System.err.println("Error, file didn't exist.");
+            createUserFile();
         } finally {
             try {
                 input.close();
+
             } catch (IOException ex) {
-                Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Game.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
 
-    public void addInfo(JComboBox userList, List resultListLarge, List resultListMedium) {
-        resultListLarge.removeAll();
-        resultListMedium.removeAll();
+    public void addInfo(List resultListLarge, List resultListMedium) {
+        try {
+            if (resultListLarge.getItemCount() != 0 && resultListMedium.getItemCount() != 0) {
+                resultListLarge.removeAll();
+                resultListMedium.removeAll();
+            }
+        } catch (Exception y) {
+            System.out.println("result remove");
+        }
+
         BufferedReader input2 = null;
         BufferedReader input3 = null;
         try {
@@ -162,7 +180,8 @@ public class FileWriteRead {
                 sor.sortArrayList(sortedResultLarge, resultListLarge);
 
             } catch (IOException ex) {
-                Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Game.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         } catch (FileNotFoundException e) {
             //System.err.println("Error, file " + filePath + " didn't exist.");
@@ -170,8 +189,10 @@ public class FileWriteRead {
             try {
                 input2.close();
                 input3.close();
+
             } catch (IOException ex) {
-                Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Game.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
